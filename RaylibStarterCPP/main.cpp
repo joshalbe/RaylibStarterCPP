@@ -20,6 +20,47 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+#include <iostream>
+
+unsigned int basicHash(unsigned char* data, unsigned int size) {
+    unsigned int hash = 0;
+    for (unsigned int i = 0; i < size; ++i) 
+    { 
+        hash += data[i]; 
+    }
+    return hash;
+}
+
+unsigned int ELFHash(unsigned char* data) {
+    unsigned int hash = 0, x = 0;
+    for (unsigned char* i = data; *i != '\0'; ++i) 
+    { 
+        hash = (hash << 4) + *i; 
+        if ((x = hash & 0xF0000000L) != 0) 
+        { 
+            hash ^= (x >> 24); 
+            hash &= ~x;
+        } 
+    }
+    return (hash & 0x7FFFFFFF);
+}
+
+unsigned int customHash(unsigned char* data) 
+{
+    unsigned int hash = 0, x = 0; 
+
+    for (unsigned char* i = data; *i != '\0'; ++i) 
+    {
+        hash = (hash * 5346) - *i;
+        if ((x = hash & 0xF0000000L) != 0)
+        {
+            hash ^= (x >> *i);
+            hash &= ~x;
+        }
+    }
+    return (hash & 0x7FFFFFFF);
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -28,11 +69,14 @@ int main(int argc, char* argv[])
     int screenWidth = 800;
     int screenHeight = 450;
 
+    unsigned char* name = new unsigned char[0];
+
+
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
-
+    
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -40,14 +84,19 @@ int main(int argc, char* argv[])
 
         // Update
         //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
+
+        std::cout << "Please enter a name" << std::endl;
+
+
+        std::cin >> name;
+        unsigned int checkSum = customHash(name);
         //----------------------------------------------------------------------------------
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(GetColor(checkSum));
 
         EndDrawing();
         //----------------------------------------------------------------------------------
